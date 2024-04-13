@@ -110,8 +110,6 @@ $(OBJD)\disolarm.obj: disasm.cpp detours.h
 $(OBJD)\disolarm64.obj: disasm.cpp detours.h
 
 test: all
-    cd $(MAKEDIR)\..\samples\slept
-    nmake /nologo test
     cd $(MAKEDIR)
 
 ################################################################# End of File.

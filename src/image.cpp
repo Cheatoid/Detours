@@ -2029,7 +2029,7 @@ BOOL CImage::Write(HANDLE hFile)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-PDETOUR_BINARY WINAPI DetourBinaryOpen(_In_ HANDLE hFile)
+DETOURS_API PDETOUR_BINARY DETOURS_CC DetourBinaryOpen(_In_ HANDLE hFile)
 {
     Detour::CImage *pImage = new NOTHROW
         Detour::CImage;
@@ -2046,7 +2046,7 @@ PDETOUR_BINARY WINAPI DetourBinaryOpen(_In_ HANDLE hFile)
     return (PDETOUR_BINARY)pImage;
 }
 
-BOOL WINAPI DetourBinaryWrite(_In_ PDETOUR_BINARY pdi,
+DETOURS_API BOOL DETOURS_CC DetourBinaryWrite(_In_ PDETOUR_BINARY pdi,
                               _In_ HANDLE hFile)
 {
     Detour::CImage *pImage = Detour::CImage::IsValid(pdi);
@@ -2060,7 +2060,7 @@ BOOL WINAPI DetourBinaryWrite(_In_ PDETOUR_BINARY pdi,
 _Writable_bytes_(*pcbData)
 _Readable_bytes_(*pcbData)
 _Success_(return != NULL)
-PVOID WINAPI DetourBinaryEnumeratePayloads(_In_ PDETOUR_BINARY pBinary,
+DETOURS_API PVOID DETOURS_CC DetourBinaryEnumeratePayloads(_In_ PDETOUR_BINARY pBinary,
                                            _Out_opt_ GUID *pGuid,
                                            _Out_ DWORD *pcbData,
                                            _Inout_ DWORD *pnIterator)
@@ -2076,7 +2076,7 @@ PVOID WINAPI DetourBinaryEnumeratePayloads(_In_ PDETOUR_BINARY pBinary,
 _Writable_bytes_(*pcbData)
 _Readable_bytes_(*pcbData)
 _Success_(return != NULL)
-PVOID WINAPI DetourBinaryFindPayload(_In_ PDETOUR_BINARY pBinary,
+DETOURS_API PVOID DETOURS_CC DetourBinaryFindPayload(_In_ PDETOUR_BINARY pBinary,
                                      _In_ REFGUID rguid,
                                      _Out_ DWORD *pcbData)
 {
@@ -2088,7 +2088,7 @@ PVOID WINAPI DetourBinaryFindPayload(_In_ PDETOUR_BINARY pBinary,
     return pImage->DataFind(rguid, pcbData);
 }
 
-PVOID WINAPI DetourBinarySetPayload(_In_ PDETOUR_BINARY pBinary,
+DETOURS_API PVOID DETOURS_CC DetourBinarySetPayload(_In_ PDETOUR_BINARY pBinary,
                                     _In_ REFGUID rguid,
                                     _In_reads_opt_(cbData) PVOID pvData,
                                     _In_ DWORD cbData)
@@ -2101,7 +2101,7 @@ PVOID WINAPI DetourBinarySetPayload(_In_ PDETOUR_BINARY pBinary,
     return pImage->DataSet(rguid, (PBYTE)pvData, cbData);
 }
 
-BOOL WINAPI DetourBinaryDeletePayload(_In_ PDETOUR_BINARY pBinary,
+DETOURS_API BOOL DETOURS_CC DetourBinaryDeletePayload(_In_ PDETOUR_BINARY pBinary,
                                       _In_ REFGUID rguid)
 {
     Detour::CImage *pImage = Detour::CImage::IsValid(pBinary);
@@ -2112,7 +2112,7 @@ BOOL WINAPI DetourBinaryDeletePayload(_In_ PDETOUR_BINARY pBinary,
     return pImage->DataDelete(rguid);
 }
 
-BOOL WINAPI DetourBinaryPurgePayloads(_In_ PDETOUR_BINARY pBinary)
+DETOURS_API BOOL DETOURS_CC DetourBinaryPurgePayloads(_In_ PDETOUR_BINARY pBinary)
 {
     Detour::CImage *pImage = Detour::CImage::IsValid(pBinary);
     if (pImage == NULL) {
@@ -2164,7 +2164,7 @@ static BOOL CALLBACK ResetSymbolCallback(_In_opt_ PVOID pContext,
     return TRUE;
 }
 
-BOOL WINAPI DetourBinaryResetImports(_In_ PDETOUR_BINARY pBinary)
+DETOURS_API BOOL DETOURS_CC DetourBinaryResetImports(_In_ PDETOUR_BINARY pBinary)
 {
     Detour::CImage *pImage = Detour::CImage::IsValid(pBinary);
     if (pImage == NULL) {
@@ -2180,7 +2180,7 @@ BOOL WINAPI DetourBinaryResetImports(_In_ PDETOUR_BINARY pBinary)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-BOOL WINAPI DetourBinaryEditImports(_In_ PDETOUR_BINARY pBinary,
+DETOURS_API BOOL DETOURS_CC DetourBinaryEditImports(_In_ PDETOUR_BINARY pBinary,
                                     _In_opt_ PVOID pContext,
                                     _In_opt_ PF_DETOUR_BINARY_BYWAY_CALLBACK pfByway,
                                     _In_opt_ PF_DETOUR_BINARY_FILE_CALLBACK pfFile,
@@ -2199,7 +2199,7 @@ BOOL WINAPI DetourBinaryEditImports(_In_ PDETOUR_BINARY pBinary,
                                pfCommit);
 }
 
-BOOL WINAPI DetourBinaryClose(_In_ PDETOUR_BINARY pBinary)
+DETOURS_API BOOL DETOURS_CC DetourBinaryClose(_In_ PDETOUR_BINARY pBinary)
 {
     Detour::CImage *pImage = Detour::CImage::IsValid(pBinary);
     if (pImage == NULL) {

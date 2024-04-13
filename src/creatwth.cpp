@@ -240,7 +240,7 @@ static PVOID FindPayloadInRemoteDetourSection(_In_ HANDLE hProcess,
 }
 
 _Success_(return != NULL)
-PVOID WINAPI DetourFindRemotePayload(_In_ HANDLE hProcess,
+DETOURS_API PVOID DETOURS_CC DetourFindRemotePayload(_In_ HANDLE hProcess,
                                      _In_ REFGUID rguid,
                                      _Out_opt_ DWORD *pcbData)
 {
@@ -674,7 +674,7 @@ static BOOL IsWow64ProcessHelper(HANDLE hProcess,
 
 //////////////////////////////////////////////////////////////////////////////
 //
-BOOL WINAPI DetourUpdateProcessWithDll(_In_ HANDLE hProcess,
+DETOURS_API BOOL DETOURS_CC DetourUpdateProcessWithDll(_In_ HANDLE hProcess,
                                        _In_reads_(nDlls) LPCSTR *rlpDlls,
                                        _In_ DWORD nDlls)
 {
@@ -747,7 +747,7 @@ BOOL WINAPI DetourUpdateProcessWithDll(_In_ HANDLE hProcess,
                                         nDlls);
 }
 
-BOOL WINAPI DetourUpdateProcessWithDllEx(_In_ HANDLE hProcess,
+DETOURS_API BOOL DETOURS_CC DetourUpdateProcessWithDllEx(_In_ HANDLE hProcess,
                                          _In_ HMODULE hModule,
                                          _In_ BOOL bIs32BitProcess,
                                          _In_reads_(nDlls) LPCSTR *rlpDlls,
@@ -896,7 +896,7 @@ BOOL WINAPI DetourUpdateProcessWithDllEx(_In_ HANDLE hProcess,
 
 //////////////////////////////////////////////////////////////////////////////
 //
-BOOL WINAPI DetourCreateProcessWithDllA(_In_opt_ LPCSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllA(_In_opt_ LPCSTR lpApplicationName,
                                         _Inout_opt_ LPSTR lpCommandLine,
                                         _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                         _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -954,7 +954,7 @@ BOOL WINAPI DetourCreateProcessWithDllA(_In_opt_ LPCSTR lpApplicationName,
 }
 
 
-BOOL WINAPI DetourCreateProcessWithDllW(_In_opt_ LPCWSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllW(_In_opt_ LPCWSTR lpApplicationName,
                                         _Inout_opt_ LPWSTR lpCommandLine,
                                         _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                         _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1010,7 +1010,7 @@ BOOL WINAPI DetourCreateProcessWithDllW(_In_opt_ LPCWSTR lpApplicationName,
     return TRUE;
 }
 
-BOOL WINAPI DetourCopyPayloadToProcess(_In_ HANDLE hProcess,
+DETOURS_API BOOL DETOURS_CC DetourCopyPayloadToProcess(_In_ HANDLE hProcess,
                                        _In_ REFGUID rguid,
                                        _In_reads_bytes_(cbData) LPCVOID pvData,
                                        _In_ DWORD cbData)
@@ -1019,7 +1019,7 @@ BOOL WINAPI DetourCopyPayloadToProcess(_In_ HANDLE hProcess,
 }
 
 _Success_(return != NULL)
-PVOID WINAPI DetourCopyPayloadToProcessEx(_In_ HANDLE hProcess,
+DETOURS_API PVOID DETOURS_CC DetourCopyPayloadToProcessEx(_In_ HANDLE hProcess,
                                           _In_ REFGUID rguid,
                                           _In_reads_bytes_(cbData) LPCVOID pvData,
                                           _In_ DWORD cbData)
@@ -1128,7 +1128,7 @@ PVOID WINAPI DetourCopyPayloadToProcessEx(_In_ HANDLE hProcess,
 static BOOL s_fSearchedForHelper = FALSE;
 static PDETOUR_EXE_HELPER s_pHelper = NULL;
 
-VOID CALLBACK DetourFinishHelperProcess(_In_ HWND,
+DETOURS_API VOID DETOURS_CC DetourFinishHelperProcess(_In_ HWND,
                                         _In_ HINSTANCE,
                                         _In_ LPSTR,
                                         _In_ INT)
@@ -1193,7 +1193,7 @@ VOID CALLBACK DetourFinishHelperProcess(_In_ HWND,
     ExitProcess(Result);
 }
 
-BOOL WINAPI DetourIsHelperProcess(VOID)
+DETOURS_API BOOL DETOURS_CC DetourIsHelperProcess(VOID)
 {
     PVOID pvData;
     DWORD cbData;
@@ -1331,7 +1331,7 @@ VOID WINAPI FreeExeHelper(PDETOUR_EXE_HELPER *pHelper)
     }
 }
 
-BOOL WINAPI DetourProcessViaHelperA(_In_ DWORD dwTargetPid,
+DETOURS_API BOOL DETOURS_CC DetourProcessViaHelperA(_In_ DWORD dwTargetPid,
                                     _In_ LPCSTR lpDllName,
                                     _In_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA)
 {
@@ -1339,7 +1339,7 @@ BOOL WINAPI DetourProcessViaHelperA(_In_ DWORD dwTargetPid,
 }
 
 
-BOOL WINAPI DetourProcessViaHelperDllsA(_In_ DWORD dwTargetPid,
+DETOURS_API BOOL DETOURS_CC DetourProcessViaHelperDllsA(_In_ DWORD dwTargetPid,
                                         _In_ DWORD nDlls,
                                         _In_reads_(nDlls) LPCSTR *rlpDlls,
                                         _In_ PDETOUR_CREATE_PROCESS_ROUTINEA pfCreateProcessA)
@@ -1430,14 +1430,14 @@ BOOL WINAPI DetourProcessViaHelperDllsA(_In_ DWORD dwTargetPid,
     return Result;
 }
 
-BOOL WINAPI DetourProcessViaHelperW(_In_ DWORD dwTargetPid,
+DETOURS_API BOOL DETOURS_CC DetourProcessViaHelperW(_In_ DWORD dwTargetPid,
                                     _In_ LPCSTR lpDllName,
                                     _In_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW)
 {
     return DetourProcessViaHelperDllsW(dwTargetPid, 1, &lpDllName, pfCreateProcessW);
 }
 
-BOOL WINAPI DetourProcessViaHelperDllsW(_In_ DWORD dwTargetPid,
+DETOURS_API BOOL DETOURS_CC DetourProcessViaHelperDllsW(_In_ DWORD dwTargetPid,
                                         _In_ DWORD nDlls,
                                         _In_reads_(nDlls) LPCSTR *rlpDlls,
                                         _In_ PDETOUR_CREATE_PROCESS_ROUTINEW pfCreateProcessW)
@@ -1535,7 +1535,7 @@ BOOL WINAPI DetourProcessViaHelperDllsW(_In_ DWORD dwTargetPid,
     return Result;
 }
 
-BOOL WINAPI DetourCreateProcessWithDllExA(_In_opt_ LPCSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllExA(_In_opt_ LPCSTR lpApplicationName,
                                           _Inout_opt_ LPSTR lpCommandLine,
                                           _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                           _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1596,7 +1596,7 @@ BOOL WINAPI DetourCreateProcessWithDllExA(_In_opt_ LPCSTR lpApplicationName,
     return TRUE;
 }
 
-BOOL WINAPI DetourCreateProcessWithDllExW(_In_opt_ LPCWSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllExW(_In_opt_ LPCWSTR lpApplicationName,
                                           _Inout_opt_  LPWSTR lpCommandLine,
                                           _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                           _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1657,7 +1657,7 @@ BOOL WINAPI DetourCreateProcessWithDllExW(_In_opt_ LPCWSTR lpApplicationName,
     return TRUE;
 }
 
-BOOL WINAPI DetourCreateProcessWithDllsA(_In_opt_ LPCSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllsA(_In_opt_ LPCSTR lpApplicationName,
                                          _Inout_opt_ LPSTR lpCommandLine,
                                          _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                          _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1718,7 +1718,7 @@ BOOL WINAPI DetourCreateProcessWithDllsA(_In_opt_ LPCSTR lpApplicationName,
     return TRUE;
 }
 
-BOOL WINAPI DetourCreateProcessWithDllsW(_In_opt_ LPCWSTR lpApplicationName,
+DETOURS_API BOOL DETOURS_CC DetourCreateProcessWithDllsW(_In_opt_ LPCWSTR lpApplicationName,
                                          _Inout_opt_ LPWSTR lpCommandLine,
                                          _In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
                                          _In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,

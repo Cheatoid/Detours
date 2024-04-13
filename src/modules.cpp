@@ -139,7 +139,7 @@ PDETOUR_SYM_INFO DetourLoadImageHlp(VOID)
     return pSymInfo;
 }
 
-PVOID WINAPI DetourFindFunction(_In_ LPCSTR pszModule,
+DETOURS_API PVOID DETOURS_CC DetourFindFunction(_In_ LPCSTR pszModule,
                                 _In_ LPCSTR pszFunction)
 {
     if (pszFunction == NULL) {
@@ -246,7 +246,7 @@ PVOID WINAPI DetourFindFunction(_In_ LPCSTR pszModule,
 //////////////////////////////////////////////////// Module Image Functions.
 //
 
-HMODULE WINAPI DetourEnumerateModules(_In_opt_ HMODULE hModuleLast)
+DETOURS_API HMODULE DETOURS_CC DetourEnumerateModules(_In_opt_ HMODULE hModuleLast)
 {
     PBYTE pbLast = (PBYTE)hModuleLast + MM_ALLOCATION_GRANULARITY;
 
@@ -294,7 +294,7 @@ HMODULE WINAPI DetourEnumerateModules(_In_opt_ HMODULE hModuleLast)
     return NULL;
 }
 
-PVOID WINAPI DetourGetEntryPoint(_In_opt_ HMODULE hModule)
+DETOURS_API PVOID DETOURS_CC DetourGetEntryPoint(_In_opt_ HMODULE hModule)
 {
     PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)hModule;
     if (hModule == NULL) {
@@ -367,7 +367,7 @@ PVOID WINAPI DetourGetEntryPoint(_In_opt_ HMODULE hModule)
     }
 }
 
-ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
+DETOURS_API ULONG DETOURS_CC DetourGetModuleSize(_In_opt_ HMODULE hModule)
 {
     PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)hModule;
     if (hModule == NULL) {
@@ -402,7 +402,7 @@ ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
     }
 }
 
-HMODULE WINAPI DetourGetContainingModule(_In_ PVOID pvAddr)
+DETOURS_API HMODULE DETOURS_CC DetourGetContainingModule(_In_ PVOID pvAddr)
 {
     MEMORY_BASIC_INFORMATION mbi;
     ZeroMemory(&mbi, sizeof(mbi));
@@ -458,7 +458,7 @@ static inline PBYTE RvaAdjust(_Pre_notnull_ PIMAGE_DOS_HEADER pDosHeader, _In_ D
     return NULL;
 }
 
-BOOL WINAPI DetourEnumerateExports(_In_ HMODULE hModule,
+DETOURS_API BOOL DETOURS_CC DetourEnumerateExports(_In_ HMODULE hModule,
                                    _In_opt_ PVOID pContext,
                                    _In_ PF_DETOUR_ENUMERATE_EXPORT_CALLBACK pfExport)
 {
@@ -540,7 +540,7 @@ BOOL WINAPI DetourEnumerateExports(_In_ HMODULE hModule,
     }
 }
 
-BOOL WINAPI DetourEnumerateImportsEx(_In_opt_ HMODULE hModule,
+DETOURS_API BOOL DETOURS_CC DetourEnumerateImportsEx(_In_opt_ HMODULE hModule,
                                      _In_opt_ PVOID pContext,
                                      _In_opt_ PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile,
                                      _In_opt_ PF_DETOUR_IMPORT_FUNC_CALLBACK_EX pfImportFunc)
@@ -664,7 +664,7 @@ DetourEnumerateImportsThunk(_In_ PVOID VoidContext,
     return pContext->pfImportFunc(pContext->pContext, nOrdinal, pszFunc, ppvFunc ? *ppvFunc : NULL);
 }
 
-BOOL WINAPI DetourEnumerateImports(_In_opt_ HMODULE hModule,
+DETOURS_API BOOL DETOURS_CC DetourEnumerateImports(_In_opt_ HMODULE hModule,
                                    _In_opt_ PVOID pContext,
                                    _In_opt_ PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile,
                                    _In_opt_ PF_DETOUR_IMPORT_FUNC_CALLBACK pfImportFunc)
@@ -746,7 +746,7 @@ static PDETOUR_LOADED_BINARY WINAPI GetPayloadSectionFromModule(HMODULE hModule)
     }
 }
 
-DWORD WINAPI DetourGetSizeOfPayloads(_In_opt_ HMODULE hModule)
+DETOURS_API DWORD DETOURS_CC DetourGetSizeOfPayloads(_In_opt_ HMODULE hModule)
 {
     PDETOUR_LOADED_BINARY pBinary = GetPayloadSectionFromModule(hModule);
     if (pBinary == NULL) {
@@ -775,7 +775,7 @@ DWORD WINAPI DetourGetSizeOfPayloads(_In_opt_ HMODULE hModule)
 _Writable_bytes_(*pcbData)
 _Readable_bytes_(*pcbData)
 _Success_(return != NULL)
-PVOID WINAPI DetourFindPayload(_In_opt_ HMODULE hModule,
+DETOURS_API PVOID DETOURS_CC DetourFindPayload(_In_opt_ HMODULE hModule,
                                _In_ REFGUID rguid,
                                _Out_opt_ DWORD *pcbData)
 {
@@ -828,7 +828,7 @@ PVOID WINAPI DetourFindPayload(_In_opt_ HMODULE hModule,
 _Writable_bytes_(*pcbData)
 _Readable_bytes_(*pcbData)
 _Success_(return != NULL)
-PVOID WINAPI DetourFindPayloadEx(_In_ REFGUID rguid,
+DETOURS_API PVOID DETOURS_CC DetourFindPayloadEx(_In_ REFGUID rguid,
                                  _Out_opt_ DWORD *pcbData)
 {
     for (HMODULE hMod = NULL; (hMod = DetourEnumerateModules(hMod)) != NULL;) {
@@ -843,7 +843,7 @@ PVOID WINAPI DetourFindPayloadEx(_In_ REFGUID rguid,
     return NULL;
 }
 
-BOOL WINAPI DetourFreePayload(_In_ PVOID pvData)
+DETOURS_API BOOL DETOURS_CC DetourFreePayload(_In_ PVOID pvData)
 {
     BOOL fSucceeded = FALSE;
 
@@ -861,7 +861,7 @@ BOOL WINAPI DetourFreePayload(_In_ PVOID pvData)
     return fSucceeded;
 }
 
-BOOL WINAPI DetourRestoreAfterWithEx(_In_reads_bytes_(cbData) PVOID pvData,
+DETOURS_API BOOL DETOURS_CC DetourRestoreAfterWithEx(_In_reads_bytes_(cbData) PVOID pvData,
                                      _In_ DWORD cbData)
 {
     PDETOUR_EXE_RESTORE pder = (PDETOUR_EXE_RESTORE)pvData;
@@ -915,7 +915,7 @@ BOOL WINAPI DetourRestoreAfterWithEx(_In_reads_bytes_(cbData) PVOID pvData,
     return fSucceeded;
 }
 
-BOOL WINAPI DetourRestoreAfterWith()
+DETOURS_API BOOL DETOURS_CC DetourRestoreAfterWith()
 {
     PVOID pvData;
     DWORD cbData;

@@ -309,7 +309,7 @@ class CDetourDis
     BYTE                m_rbScratchDst[64]; // matches or exceeds rbCode
 };
 
-PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
+PVOID DETOURS_CC DetourCopyInstruction(_In_opt_ PVOID pDst,
                                    _Inout_opt_ PVOID *ppDstPool,
                                    _In_ PVOID pSrc,
                                    _Out_opt_ PVOID *ppTarget,
@@ -2250,7 +2250,7 @@ VOID DETOUR_IA64_BUNDLE::SetStop()
 
 #endif // DETOURS_IA64
 
-PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
+PVOID DETOURS_CC DetourCopyInstruction(_In_opt_ PVOID pDst,
                                    _Inout_opt_ PVOID *ppDstPool,
                                    _In_ PVOID pSrc,
                                    _Out_opt_ PVOID *ppTarget,
@@ -3575,7 +3575,7 @@ PBYTE CDetourDis::CopyInstruction(PBYTE pDst,
 }
 
 
-PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
+PVOID DETOURS_CC DetourCopyInstruction(_In_opt_ PVOID pDst,
                                    _Inout_opt_ PVOID *ppDstPool,
                                    _In_ PVOID pSrc,
                                    _Out_opt_ PVOID *ppTarget,
@@ -4261,7 +4261,7 @@ BYTE CDetourDis::CopyLdrLiteral(BYTE* pSource, BYTE* pDest, ULONG instruction)
 }
 
 
-PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
+PVOID DETOURS_CC DetourCopyInstruction(_In_opt_ PVOID pDst,
                                    _Inout_opt_ PVOID *ppDstPool,
                                    _In_ PVOID pSrc,
                                    _Out_opt_ PVOID *ppTarget,
@@ -4278,7 +4278,7 @@ PVOID WINAPI DetourCopyInstruction(_In_opt_ PVOID pDst,
 
 #endif // DETOURS_ARM64
 
-BOOL WINAPI DetourSetCodeModule(_In_ HMODULE hModule,
+BOOL DETOURS_CC DetourSetCodeModule(_In_ HMODULE hModule,
                                 _In_ BOOL fLimitReferencesToModule)
 {
 #if defined(DETOURS_X64) || defined(DETOURS_X86)

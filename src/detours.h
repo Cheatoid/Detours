@@ -12,7 +12,7 @@
 #define _DETOURS_H_
 
 #define DETOURS_VERSION     0x4c0c1   // 0xMAJORcMINORcPATCH
-#define DETOURS_API __declspec(dllexport)
+#define DETOURS_API /*extern "C"*/ __declspec(dllexport)
 #define DETOURS_CC __cdecl
 
 //////////////////////////////////////////////////////////////////////////////
@@ -383,7 +383,10 @@ extern "C" {
     extern const GUID DETOUR_EXE_HELPER_GUID;
 
 #define DETOUR_TRAMPOLINE_SIGNATURE             0x21727444  // Dtr!
-    typedef struct _DETOUR_TRAMPOLINE DETOUR_TRAMPOLINE, * PDETOUR_TRAMPOLINE;
+    typedef struct _DETOUR_TRAMPOLINE DETOUR_TRAMPOLINE, *PDETOUR_TRAMPOLINE;
+#ifndef DETOUR_MAX_SUPPORTED_IMAGE_SECTION_HEADERS
+#define DETOUR_MAX_SUPPORTED_IMAGE_SECTION_HEADERS      32
+#endif // !DETOUR_MAX_SUPPORTED_IMAGE_SECTION_HEADERS
 
     /////////////////////////////////////////////////////////// Binary Structures.
     //
@@ -455,10 +458,10 @@ extern "C" {
             IMAGE_NT_HEADERS64  inh64;
 #endif
 #ifdef IMAGE_NT_OPTIONAL_HDR64_MAGIC    // some environments do not have this
-            BYTE                raw[sizeof(IMAGE_NT_HEADERS64) +
-                sizeof(IMAGE_SECTION_HEADER) * 32];
+        BYTE                raw[sizeof(IMAGE_NT_HEADERS64) +
+                                sizeof(IMAGE_SECTION_HEADER) * DETOUR_MAX_SUPPORTED_IMAGE_SECTION_HEADERS];
 #else
-            BYTE                raw[0x108 + sizeof(IMAGE_SECTION_HEADER) * 32];
+        BYTE                raw[0x108 + sizeof(IMAGE_SECTION_HEADER) * DETOUR_MAX_SUPPORTED_IMAGE_SECTION_HEADERS];
 #endif
         };
         DETOUR_CLR_HEADER   clr;
@@ -593,6 +596,8 @@ extern "C" {
         _In_ BOOL fLimitReferencesToModule);
     DETOURS_API PVOID DETOURS_CC DetourAllocateRegionWithinJumpBounds(_In_ LPCVOID pbTarget,
         _Out_ PDWORD pcbAllocatedSize);
+    DETOURS_API BOOL DETOURS_CC DetourIsFunctionImported(_In_ PBYTE pbCode,
+        _In_ PBYTE pbAddress);
 
     ///////////////////////////////////////////////////// Loaded Binary Functions.
     //

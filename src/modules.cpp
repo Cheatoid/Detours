@@ -645,6 +645,7 @@ DETOURS_API BOOL DETOURS_CC DetourEnumerateImportsEx(_In_opt_ HMODULE hModule,
 struct _DETOUR_ENUMERATE_IMPORTS_THUNK_CONTEXT
 {
     PVOID pContext;
+    PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile;
     PF_DETOUR_IMPORT_FUNC_CALLBACK pfImportFunc;
 };
 
@@ -674,11 +675,10 @@ DETOURS_API BOOL DETOURS_CC DetourEnumerateImports(_In_opt_ HMODULE hModule,
         return FALSE;
     }
 
-    _DETOUR_ENUMERATE_IMPORTS_THUNK_CONTEXT const context = { pContext, pfImportFunc };
-
+    _DETOUR_ENUMERATE_IMPORTS_THUNK_CONTEXT const context = { pContext, pfImportFile, pfImportFunc };
     return DetourEnumerateImportsEx(hModule,
                                     (PVOID)&context,
-                                    pfImportFile,
+                                    &DetourEnumerateImportsFile,
                                     &DetourEnumerateImportsThunk);
 }
 

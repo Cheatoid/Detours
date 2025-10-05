@@ -209,9 +209,9 @@ inline PBYTE detour_skip_jmp(PBYTE pbCode, PVOID *ppGlobals)
             // enough to hold the detour code bytes.
             if (pbCode[0] == 0xff &&
                 pbCode[1] == 0x25 &&
-                *(UNALIGNED INT32 *)&pbCode[2] == (UNALIGNED INT32)(pbCode + 0x1000)) {   // jmp [rip+PAGE_SIZE-6]
+                *(UNALIGNED INT32 *)&pbCode[2] == (UNALIGNED INT32)(pbCode + 0x1000)) {   // jmp [eip+PAGE_SIZE-6]
 
-                DETOUR_TRACE(("%p->%p: OS patch encountered, reset back to long jump 5 bytes prior to target function. \n", pbCode, pbCodeOriginal));
+                DETOUR_TRACE(("%p->%p: OS patch encountered, reset back to long jump 5 bytes prior to target function.\n", pbCode, pbCodeOriginal));
                 pbCode = pbCodeOriginal;
             }
 
@@ -443,7 +443,7 @@ inline PBYTE detour_skip_jmp(PBYTE pbCode, PVOID *ppGlobals)
                 pbCode[1] == 0x25 &&
                 *(UNALIGNED INT32 *)&pbCode[2] == 0xFFA) {   // jmp [rip+PAGE_SIZE-6]
 
-                DETOUR_TRACE(("%p->%p: OS patch encountered, reset back to long jump 5 bytes prior to target function. \n", pbCode, pbCodeOriginal));
+                DETOUR_TRACE(("%p->%p: OS patch encountered, reset back to long jump 5 bytes prior to target function.\n", pbCode, pbCodeOriginal));
                 pbCode = pbCodeOriginal;
             }
         }
@@ -1228,7 +1228,7 @@ inline BOOL detour_does_code_end_function(PBYTE pbCode)
     if (detour_is_code_os_patched(pbCode)) {
         return FALSE;
     }
-    if ((Opcode & 0xfffffc1f) == 0xd65f0000 ||      // br <reg>
+    if ((Opcode & 0xffbffc1f) == 0xd61f0000 ||      // ret/br <reg>
         (Opcode & 0xfc000000) == 0x14000000) {      // b <imm26>
         return TRUE;
     }
@@ -1911,41 +1911,46 @@ DETOURS_API LONG DETOURS_CC DetourTransactionCommitEx(_Out_opt_ PVOID **pppFaile
         }
     }
 
-    // Update any suspended threads.
-    for (t = s_pPendingThreads; t != NULL; t = t->pNext) {
-        CONTEXT cxt;
-        cxt.ContextFlags = CONTEXT_CONTROL;
-
 #undef DETOURS_EIP
+#undef DETOURS_CONTEXT_FLAGS
 
 #ifdef DETOURS_X86
 #define DETOURS_EIP         Eip
+#define DETOURS_CONTEXT_FLAGS CONTEXT_CONTROL
 #endif // DETOURS_X86
 
 #ifdef DETOURS_X64
 #define DETOURS_EIP         Rip
+#define DETOURS_CONTEXT_FLAGS (CONTEXT_CONTROL | CONTEXT_INTEGER)
 #endif // DETOURS_X64
 
 #ifdef DETOURS_IA64
 #define DETOURS_EIP         StIIP
+#define DETOURS_CONTEXT_FLAGS CONTEXT_CONTROL
 #endif // DETOURS_IA64
 
 #ifdef DETOURS_ARM
 #define DETOURS_EIP         Pc
+#define DETOURS_CONTEXT_FLAGS CONTEXT_CONTROL
 #endif // DETOURS_ARM
 
 #ifdef DETOURS_ARM64
 #define DETOURS_EIP         Pc
+#define DETOURS_CONTEXT_FLAGS (CONTEXT_CONTROL | CONTEXT_INTEGER)
 #endif // DETOURS_ARM64
 
 typedef ULONG_PTR DETOURS_EIP_TYPE;
 
+    // Update any suspended threads.
+    for (t = s_pPendingThreads; t != NULL; t = t->pNext) {
+        CONTEXT cxt;
+        cxt.ContextFlags = DETOURS_CONTEXT_FLAGS;
         if (GetThreadContext(t->hThread, &cxt)) {
             for (o = s_pPendingOperations; o != NULL; o = o->pNext) {
                 if (o->fIsRemove) {
                     if (cxt.DETOURS_EIP >= (DETOURS_EIP_TYPE)(ULONG_PTR)o->pTrampoline &&
                         cxt.DETOURS_EIP < (DETOURS_EIP_TYPE)((ULONG_PTR)o->pTrampoline
-                                                             + sizeof(o->pTrampoline))
+                                                             + sizeof(*o->pTrampoline))
                        ) {
 
                         cxt.DETOURS_EIP = (DETOURS_EIP_TYPE)
@@ -2138,6 +2143,15 @@ DETOURS_API LONG DETOURS_CC DetourAttachEx(_Inout_ PVOID *ppPointer,
     DETOUR_TRACE(("  ppldTarget=%p, code=%p [gp=%p]\n",
                   ppldTarget, pbTarget, pTargetGlobals));
 #else // DETOURS_IA64
+#if defined(_M_ARM64EC)
+    if (RtlIsEcCode(reinterpret_cast<DWORD64>(*ppPointer))) {
+        DETOUR_TRACE(("*ppPointer is an Arm64EC address (ppPointer=%p). "
+                      "An Arm64EC address cannot be legitimately detoured with an x64 jmp. "
+                      "Mark the target function with __declspec(hybrid_patchable) to make it detour-able. "
+                      "We still allow an Arm64EC function to be detoured with an x64 jmp to make it easy (crash) to debug.\n", ppPointer));
+        DETOUR_BREAK();
+    }
+#endif
     pbTarget = (PBYTE)DetourCodeFromPointer(pbTarget, NULL);
     pDetour = DetourCodeFromPointer(pDetour, NULL);
 #endif // !DETOURS_IA64

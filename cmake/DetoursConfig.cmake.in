@@ -1,0 +1,36 @@
+# ##############################################################################
+#
+#  DetoursConfig.cmake - CMake configuration file for Microsoft Detours
+#
+#  Microsoft Research Detours Package, Version 4.0.1
+#
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+#
+# ##############################################################################
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# No external dependencies required for Detours
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/detours-targets.cmake")
+
+# Check that the targets exist
+check_required_components(Detours)
+
+# Set some convenience variables
+set(DETOURS_FOUND TRUE)
+set(DETOURS_VERSION "@PROJECT_VERSION@")
+set(DETOURS_VERSION_STRING "@DETOURS_VERSION_STRING@")
+
+# Provide hints for using the library
+if(TARGET Detours::detours)
+    set(DETOURS_LIBRARIES Detours::detours)
+    get_target_property(DETOURS_INCLUDE_DIRS Detours::detours INTERFACE_INCLUDE_DIRECTORIES)
+endif()
+
+# ##############################################################################
+# End of File
+# ##############################################################################

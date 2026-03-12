@@ -39,13 +39,13 @@ if not exist "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.e
     echo vswhere program was not found; make sure to install Visual Studio!
     exit /b 2
 )
-for /f "usebackq tokens=* delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do (
+for /f "usebackq tokens=* delims=" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -products * -latest -prerelease -requires Microsoft.Component.MSBuild -property installationPath`) do (
     set "InstallDir=%%i"
 )
-if defined VS_EDITION (
-    echo Using environment specified VS_EDITION: %VS_EDITION%
-    set "InstallDir=%InstallDir%\..\%VS_EDITION%"
-)
+rem if defined VS_EDITION (
+rem     echo Using environment specified VS_EDITION: %VS_EDITION%
+rem     set "InstallDir=%InstallDir%\..\%VS_EDITION%"
+rem )
 
 rem cls
 echo %InstallDir%

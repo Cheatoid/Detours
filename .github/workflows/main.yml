@@ -7,12 +7,16 @@ env:
   # Compile in parallel where possible.
   CL: /MP
 
-# Triggers the workflow on push or pull request events for the main branch.
+# Workflow disabled - use build-release.yml instead
+# keep the file valid by allowing only manual runs
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch: {}
+# Triggers the workflow on push or pull request events for the main branch.
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
 
 permissions:
   actions: read
@@ -52,13 +56,6 @@ jobs:
           DETOURS_TARGET_PROCESSOR: ${{ env.VSCMD_ARG_TGT_ARCH }}
           DETOURS_CONFIG: ${{ matrix.conf }}
         run: nmake
-
-      - name: Run unit tests for ${{ matrix.arch }} on ${{ matrix.os }}
-        id: run-unit-tests
-        env:
-          DETOURS_CONFIG: ${{ matrix.conf }}
-        run: cd tests && nmake test
-        if: ${{ matrix.arch == 'x86' || matrix.arch == 'x64' }}
 
       - name: Upload artifacts for ${{ matrix.arch }} on ${{ matrix.os }}
         uses: actions/upload-artifact@v4

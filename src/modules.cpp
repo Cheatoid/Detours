@@ -665,6 +665,19 @@ DetourEnumerateImportsThunk(_In_ PVOID VoidContext,
     return pContext->pfImportFunc(pContext->pContext, nOrdinal, pszFunc, ppvFunc ? *ppvFunc : NULL);
 }
 
+static
+BOOL
+CALLBACK
+DetourEnumerateImportsFile(_In_ PVOID VoidContext,
+                           _In_opt_ HMODULE hModule,
+                           _In_opt_ LPCSTR pszFile)
+{
+    _DETOUR_ENUMERATE_IMPORTS_THUNK_CONTEXT const * const
+        pContext = (_DETOUR_ENUMERATE_IMPORTS_THUNK_CONTEXT*)VoidContext;
+    return pContext->pfImportFile(pContext->pContext, hModule, pszFile);
+}
+
+
 DETOURS_API BOOL DETOURS_CC DetourEnumerateImports(_In_opt_ HMODULE hModule,
                                    _In_opt_ PVOID pContext,
                                    _In_opt_ PF_DETOUR_IMPORT_FILE_CALLBACK pfImportFile,

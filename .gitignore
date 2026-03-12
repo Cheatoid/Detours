@@ -1,6 +1,28 @@
 # C extensions
 *.so
 
+# CMake build directories
+build/
+build_x86/
+build_x64/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+
+# CMake generated files
+*.cmake.in
+!cmake/*.cmake.in
+DetoursConfig.cmake
+DetoursConfigVersion.cmake
+detours-targets*.cmake
+
+# Binary output directories
+bin.X86/
+bin.X64/
+lib.X86/
+lib.X64/
+
 # Unit test / coverage reports
 .coverage
 .tox

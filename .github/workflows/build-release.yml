@@ -1,0 +1,149 @@
+name: Build and Release Detours
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a GitHub Release'
+        required: false
+        default: 'false'
+        type: boolean
+      version:
+        description: 'Release version (e.g., 4.0.1)'
+        required: false
+        default: '4.0.1'
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build with build_cmake.cmd
+        run: cmd /c build_cmake.cmd "Visual Studio 17 2022"
+
+      - name: Create release package
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          if ([string]::IsNullOrEmpty($version)) { $version = "4.0.1" }
+
+          # Create combined package
+          New-Item -ItemType Directory -Force -Path release/include
+          New-Item -ItemType Directory -Force -Path release/bin/X86
+          New-Item -ItemType Directory -Force -Path release/bin/X64
+          New-Item -ItemType Directory -Force -Path release/lib/X86
+          New-Item -ItemType Directory -Force -Path release/lib/X64
+
+          # Headers
+          Copy-Item src/detours.h -Destination release/include/
+          Copy-Item src/detver.h -Destination release/include/
+
+          # x86 binaries
+          Copy-Item bin.X86/Detours.X86.dll -Destination release/bin/X86/
+          Copy-Item bin.X86/Detours.X86.pdb -Destination release/bin/X86/
+          Copy-Item lib.X86/Detours.X86.lib -Destination release/lib/X86/
+
+          # x64 binaries
+          Copy-Item bin.X64/Detours.X64.dll -Destination release/bin/X64/
+          Copy-Item bin.X64/Detours.X64.pdb -Destination release/bin/X64/
+          Copy-Item lib.X64/Detours.X64.lib -Destination release/lib/X64/
+
+          # Copy license and readme
+          Copy-Item LICENSE.md -Destination release/
+          Copy-Item README.md -Destination release/
+
+          # Create zip
+          Compress-Archive -Path release/* -DestinationPath "Detours-${version}.zip"
+
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Upload x86 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Detours-x86
+          path: |
+            bin.X86/Detours.X86.dll
+            bin.X86/Detours.X86.pdb
+            lib.X86/Detours.X86.lib
+            src/detours.h
+            src/detver.h
+          retention-days: 30
+
+      - name: Upload x64 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Detours-x64
+          path: |
+            bin.X64/Detours.X64.dll
+            bin.X64/Detours.X64.pdb
+            lib.X64/Detours.X64.lib
+            src/detours.h
+            src/detver.h
+          retention-days: 30
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Detours-release-package
+          path: Detours-*.zip
+          retention-days: 90
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.create_release == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Detours ${{ github.event.inputs.version }}
+          body: |
+            ## Microsoft Research Detours ${{ github.event.inputs.version }}
+
+            ### Included Files
+
+            **x86 (32-bit):**
+            - `Detours.X86.dll` - 32-bit DLL
+            - `Detours.X86.pdb` - Debug symbols
+            - `Detours.X86.lib` - Import library
+
+            **x64 (64-bit):**
+            - `Detours.X64.dll` - 64-bit DLL
+            - `Detours.X64.pdb` - Debug symbols
+            - `Detours.X64.lib` - Import library
+
+            **Headers:**
+            - `detours.h` - Main header
+            - `detver.h` - Version header
+
+            ### Build Configuration
+            - Built with Visual Studio 2022 on Windows
+            - Release configuration with maximum optimizations
+            - Link-time code generation (LTCG) enabled
+          files: |
+            Detours-*.zip
+            bin.X86/Detours.X86.dll
+            bin.X86/Detours.X86.pdb
+            lib.X86/Detours.X86.lib
+            bin.X64/Detours.X64.dll
+            bin.X64/Detours.X64.pdb
+            lib.X64/Detours.X64.lib
+            src/detours.h
+            src/detver.h
+          prerelease: ${{ github.event.inputs.prerelease }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
